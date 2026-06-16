@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="theme-color" content="#010409"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-title" content="Sport Analyzer"/>
+<title>Sport Analyzer PRO</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#010409;color:#e6edf3;font-family:'DM Sans','Segoe UI',sans-serif;min-height:100vh}
+@keyframes spin{to{transform:rotate(360deg)}}
+input,button{font-family:inherit}
+input:focus{outline:none;border-color:#388bfd!important}
+button{cursor:pointer;transition:all 0.15s}
+::-webkit-scrollbar{height:4px;width:4px}
+::-webkit-scrollbar-track{background:#0d1117}
+::-webkit-scrollbar-thumb{background:#30363d;border-radius:2px}
+.header{background:#0d1117;border-bottom:1px solid #21262d;padding:14px 0;text-align:center;position:sticky;top:0;z-index:100}
+.header h1{font-size:20px;font-weight:700;letter-spacing:2px;font-family:Georgia,serif}
+.header h1 span{color:#00ff9d}
+.header p{color:#8b949e;font-size:11px;margin-top:3px}
+.container{max-width:820px;margin:0 auto;padding:14px 12px}
+.panel{background:#161b27;border:1px solid #30363d;border-radius:10px;padding:14px;margin-bottom:12px}
+.panel-title{font-size:13px;letter-spacing:1px;margin-bottom:12px;color:#e6edf3;font-weight:700}
+.tabs{display:flex;gap:4px;overflow-x:auto;margin-bottom:12px;padding-bottom:2px}
+.tab{background:#161b27;border:1px solid #30363d;border-radius:7px;color:#8b949e;padding:7px 12px;font-size:12px;white-space:nowrap;flex-shrink:0}
+.tab.active{background:#388bfd22;border-color:#388bfd;color:#388bfd;font-weight:700}
+.tab.esport-active{background:#7c3aed22;border-color:#7c3aed;color:#a78bfa;font-weight:700}
+.etab{background:#0d1117;border:1px solid #21262d;border-radius:6px;color:#8b949e;padding:5px 10px;font-size:11px;white-space:nowrap;flex-shrink:0}
+.etab.active{background:#7c3aed22;border-color:#7c3aed;color:#a78bfa;font-weight:700}
+.key-row{display:flex;gap:8px;margin-bottom:8px}
+.key-input{flex:1;background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;padding:9px 12px;font-size:13px}
+.key-input.saved{border-color:#00ff9d55}
+.btn-save{background:#388bfd;border:none;border-radius:6px;color:#fff;padding:9px 16px;font-weight:700;font-size:13px}
+.btn-save.saved{background:#00ff9d22;border:1px solid #00ff9d44;color:#00ff9d}
+.leagues-wrap{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.league-btn{background:#0d1117;border:1px solid #30363d;border-radius:5px;color:#8b949e;padding:4px 9px;font-size:11px}
+.league-btn.active{background:#388bfd22;border-color:#388bfd;color:#388bfd;font-weight:600}
+.ctrl-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn-load{background:linear-gradient(135deg,#388bfd,#1a6fd4);border:none;border-radius:7px;color:#fff;padding:9px 16px;font-weight:700;font-size:13px;display:flex;align-items:center;gap:7px}
+.btn-load:disabled{background:#21262d;color:#8b949e;cursor:not-allowed}
+.btn-key{background:none;border:1px solid #30363d;border-radius:6px;color:#8b949e;padding:9px 12px;font-size:12px}
+.stats-mini{display:flex;gap:14px;margin-left:auto}
+.stat-box{text-align:center}
+.stat-val{font-size:16px;font-weight:700}
+.stat-lbl{color:#8b949e;font-size:9px;text-transform:uppercase;letter-spacing:0.5px}
+.sel-row{display:flex;gap:6px;margin-bottom:8px;align-items:center}
+.btn-sel{background:#21262d;border:1px solid #30363d;border-radius:5px;color:#c9d1d9;padding:4px 10px;font-size:11px}
+.fixture{border:1px solid #21262d;border-radius:7px;margin-bottom:5px;overflow:hidden;background:#0a0e13;transition:all 0.15s}
+.fixture.selected{border-color:#388bfd55;background:#388bfd08}
+.fixture-row{display:flex;align-items:center;gap:8px;padding:9px 12px}
+.fixture-check{accent-color:#388bfd;width:15px;height:15px;flex-shrink:0}
+.fixture-info{flex:1;min-width:0}
+.fixture-name{color:#e6edf3;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fixture-meta{color:#8b949e;font-size:10px;margin-top:1px}
+.btn-odds{background:#21262d;border:1px solid #30363d;color:#8b949e;border-radius:4px;padding:3px 8px;font-size:10px;flex-shrink:0}
+.odds-grid{padding:0 12px 10px;display:grid;gap:6px}
+.odds-field label{display:block;color:#8b949e;font-size:9px;margin-bottom:2px;text-transform:uppercase}
+.odds-field input{width:100%;background:#0d1117;border:1px solid #30363d;border-radius:4px;color:#e6edf3;padding:5px 6px;font-size:11px}
+.loading-row{padding:7px 12px;display:flex;align-items:center;gap:7px;border-top:1px solid #21262d}
+.spinner{width:12px;height:12px;border-radius:50%;border:2px solid #388bfd33;border-top-color:#388bfd;animation:spin 0.8s linear infinite;flex-shrink:0}
+.error-row{padding:7px 12px;border-top:1px solid #ff4d6d22;color:#ff4d6d;font-size:11px}
+.result-card{background:#0f1419;border:1px solid #21262d;border-radius:8px;overflow:hidden;margin:0 12px 12px}
+.result-header{padding:11px 14px;display:flex;justify-content:space-between;align-items:center;background:#161b27;cursor:pointer;user-select:none}
+.result-body{padding:14px 16px 18px}
+.summary{color:#c9d1d9;font-size:12px;line-height:1.6;margin-bottom:12px;border-left:3px solid #388bfd;padding-left:10px}
+.conf-wrap{margin-bottom:12px}
+.conf-label{color:#8b949e;font-size:10px;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px}
+.conf-bar-wrap{display:flex;align-items:center;gap:8px}
+.conf-bar-bg{flex:1;height:4px;background:#ffffff11;border-radius:2px;overflow:hidden}
+.conf-bar-fill{height:100%;border-radius:2px}
+.markets-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.market-box{background:#0d111788;border-radius:6px;padding:10px;border:1px solid #21262d}
+.market-title{color:#8b949e;font-size:9px;margin-bottom:7px;text-transform:uppercase;letter-spacing:1px}
+.prob-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.prob-label{color:#c9d1d9;font-size:12px}
+.prob-right{display:flex;gap:6px;align-items:center}
+.prob-implicit{color:#8b949e;font-size:10px}
+.prob-val{color:#e6edf3;font-weight:700;font-size:12px}
+.tag{border-radius:4px;padding:1px 7px;font-size:10px;font-weight:700}
+.tag-yes{background:#00ff9d18;color:#00ff9d;border:1px solid #00ff9d33}
+.tag-no{background:#ff4d6d18;color:#ff4d6d;border:1px solid #ff4d6d33}
+.divider{border-top:1px solid #21262d;margin:7px 0}
+.kombinalt-box{background:#0d111788;border-radius:6px;padding:10px;border:1px solid #21262d;margin-bottom:8px}
+.kombinalt-grid{display:grid;grid-template-columns:1fr 1fr;gap:3px}
+.bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kelly-box{background:#0d111788;border-radius:6px;padding:10px;border:1px solid #21262d}
+.kelly-row{color:#c9d1d9;font-size:11px;margin-bottom:2px}
+.risk-box{background:#ff4d6d0d;border-radius:6px;padding:10px;border:1px solid #ff4d6d22}
+.risk-title{color:#ff4d6d;font-size:9px;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px}
+.risk-text{color:#c9d1d9;font-size:11px;line-height:1.5}
+.btn-analyze{width:100%;padding:14px;margin-top:10px;background:linear-gradient(135deg,#00ff9d,#00cc7a);border:none;border-radius:9px;color:#010409;font-size:15px;font-weight:700;letter-spacing:2px}
+.btn-analyze:disabled{background:#21262d;color:#8b949e;cursor:not-allowed}
+.footer{text-align:center;color:#21262d;font-size:10px;margin-top:20px;padding-top:12px;border-top:1px solid #21262d}
+.error-msg{color:#ff4d6d;font-size:12px;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>🎯 SPORT ANALYZER <span>PRO</span></h1>
+  <p id="headerDate">AI · 8 sportág</p>
+</div>
+<div class="container">
+  <div class="panel" id="settingsPanel" style="display:none">
+    <div class="panel-title">🔑 API KULCSOK</div>
+    <div style="color:#8b949e;font-size:11px;margin-bottom:6px">API-Sports kulcs (Foci, Kosár, Jégkorong, NFL, Baseball, Kézilabda, Röplabda)</div>
+    <div class="key-row">
+      <input type="password" class="key-input" id="apiKeyInput" placeholder="api-sports.io kulcs"/>
+      <button class="btn-save" id="apiKeySaveBtn" onclick="saveApiKey()">Mentés</button>
+    </div>
+    <div style="color:#8b949e;font-size:11px;margin-bottom:6px;margin-top:8px">PandaScore token (E-Sport)</div>
+    <div class="key-row">
+      <input type="password" class="key-input" id="pandaKeyInput" placeholder="pandascore.co token"/>
+      <button class="btn-save" id="pandaKeySaveBtn" onclick="savePandaKey()">Mentés</button>
+    </div>
+    <div style="color:#8b949e;font-size:10px;margin-top:6px">⚠️ A kulcsok csak a böngésződben tárolódnak, sehova sem kerülnek el.</div>
+  </div>
+
+  <div class="tabs" id="sportTabs"></div>
+  <div class="tabs" id="esportTabs" style="display:none"></div>
+
+  <div class="panel">
+    <div id="leagueFilter" style="margin-bottom:10px;display:none">
+      <button onclick="toggleLeagues()" style="background:none;border:none;color:#8b949e;font-size:11px;padding:0;text-transform:uppercase;letter-spacing:1px" id="leagueToggleBtn">⚙️ Bajnokságok</button>
+      <div class="leagues-wrap" id="leaguesWrap" style="display:none"></div>
+    </div>
+    <div class="ctrl-row">
+      <button class="btn-load" id="loadBtn" onclick="loadFixtures()">📅 Mai meccsek letöltése</button>
+      <button class="btn-key" onclick="toggleSettings()">⚙️ Beállítások</button>
+      <div class="stats-mini" id="statsRow" style="display:none">
+        <div class="stat-box"><div class="stat-val" id="statTotal" style="color:#e6edf3">0</div><div class="stat-lbl">Meccs</div></div>
+        <div class="stat-box"><div class="stat-val" id="statSelected" style="color:#388bfd">0</div><div class="stat-lbl">Kijelölve</div></div>
+        <div class="stat-box"><div class="stat-val" id="statValue" style="color:#00ff9d">0</div><div class="stat-lbl">Value</div></div>
+      </div>
+    </div>
+    <div id="fetchError" class="error-msg" style="display:none"></div>
+  </div>
+
+  <div class="sel-row" id="selRow" style="display:none">
+    <button class="btn-sel" onclick="selectAll()">✅ Mind</button>
+    <button class="btn-sel" onclick="selectNone()">☐ Törlés</button>
+    <span style="color:#8b949e;font-size:11px" id="selHint"></span>
+  </div>
+
+  <div id="fixturesContainer"></div>
+
+  <button class="btn-analyze" id="analyzeBtn" onclick="analyzeSelected()" disabled style="display:none">🔍 MECCSEK ELEMZÉSE</button>
+
+  <div class="footer">⚠️ Szórakoztató és tájékoztató célú. A fogadás kockázattal jár!</div>
+</div>
+
+<script>
+const FOOTBALL_LEAGUES=[
+  {id:39,name:"Premier League 🏴󠁧󠁢󠁥󠁮󠁧󠁿"},{id:140,name:"La Liga 🇪🇸"},{id:78,name:"Bundesliga 🇩🇪"},
+  {id:135,name:"Serie A 🇮🇹"},{id:61,name:"Ligue 1 🇫🇷"},{id:2,name:"Champions League 🌍"},
+  {id:3,name:"Europa League 🌍"},{id:848,name:"Conference League 🌍"},{id:40,name:"Championship 🏴󠁧󠁢󠁥󠁮󠁧󠁿"},
+  {id:41,name:"League One 🏴󠁧󠁢󠁥󠁮󠁧󠁿"},{id:42,name:"League Two 🏴󠁧󠁢󠁥󠁮󠁧󠁿"},{id:141,name:"Segunda 🇪🇸"},
+  {id:79,name:"2. Bundesliga 🇩🇪"},{id:136,name:"Serie B 🇮🇹"},{id:62,name:"Ligue 2 🇫🇷"},
+  {id:88,name:"Eredivisie 🇳🇱"},{id:89,name:"Eerste Div 🇳🇱"},{id:94,name:"Primeira Liga 🇵🇹"},
+  {id:95,name:"Liga Portugal 2 🇵🇹"},{id:203,name:"Süper Lig 🇹🇷"},{id:204,name:"1. Lig 🇹🇷"},
+  {id:144,name:"Pro League 🇧🇪"},{id:179,name:"Scottish Prem 🏴󠁧󠁢󠁳󠁣󠁴󠁿"},{id:218,name:"Bundesliga 🇦🇹"},
+  {id:207,name:"Super League 🇨🇭"},{id:197,name:"Super League 🇬🇷"},{id:345,name:"Fortuna Liga 🇨🇿"},
+  {id:106,name:"Ekstraklasa 🇵🇱"},{id:283,name:"Liga 1 🇷🇴"},{id:286,name:"Superliga 🇷🇸"},
+  {id:210,name:"HNL 🇭🇷"},{id:333,name:"Premier Liga 🇺🇦"},{id:235,name:"Premier League 🇷🇺"},
+  {id:271,name:"NB I 🇭🇺"},{id:272,name:"NB II 🇭🇺"},{id:273,name:"Magyar Kupa 🇭🇺"},
+  {id:13,name:"Copa Libertadores 🌎"},{id:11,name:"Copa Sudamericana 🌎"},
+  {id:71,name:"Brasileirao A 🇧🇷"},{id:72,name:"Brasileirao B 🇧🇷"},{id:130,name:"Primera Div 🇦🇷"},
+  {id:253,name:"MLS 🇺🇸"},{id:254,name:"USL 🇺🇸"},{id:262,name:"Liga MX 🇲🇽"},
+  {id:17,name:"AFC CL 🌏"},{id:98,name:"J1 League 🇯🇵"},{id:169,name:"K League 🇰🇷"},
+  {id:307,name:"Saudi Pro League 🇸🇦"},{id:188,name:"A-League 🇦🇺"},{id:20,name:"CAF CL 🌍"},
+  {id:4,name:"Euro Qualifying 🌍"},{id:5,name:"Nations League 🌍"},{id:1,name:"World Cup 🌍"},
+  {id:9,name:"Copa America 🌎"},
+];
+const BASKETBALL_LEAGUES=[
+  {id:12,name:"NBA 🇺🇸"},{id:128,name:"WNBA 🇺🇸"},{id:116,name:"NCAA 🇺🇸"},
+  {id:120,name:"EuroLeague 🌍"},{id:118,name:"Basketball CL 🌍"},{id:117,name:"FIBA Europe Cup 🌍"},
+  {id:132,name:"ACB 🇪🇸"},{id:119,name:"Lega Basket 🇮🇹"},{id:121,name:"Jeep Elite 🇫🇷"},
+  {id:122,name:"Bundesliga 🇩🇪"},{id:123,name:"VTB United 🇷🇺"},{id:124,name:"BSL 🇹🇷"},
+  {id:125,name:"Superleague 🇬🇷"},{id:129,name:"ABA Liga 🌍"},{id:4,name:"NBL 🇦🇺"},
+];
+const HOCKEY_LEAGUES=[
+  {id:57,name:"NHL 🇺🇸"},{id:63,name:"AHL 🇺🇸"},{id:2,name:"SHL 🇸🇪"},
+  {id:24,name:"Allsvenskan 🇸🇪"},{id:3,name:"Liiga 🇫🇮"},{id:4,name:"GET-ligaen 🇳🇴"},
+  {id:5,name:"DEL 🇩🇪"},{id:1,name:"KHL 🇷🇺"},{id:11,name:"VHL 🇷🇺"},
+  {id:6,name:"Extraliga 🇨🇿"},{id:7,name:"Tipsport Liga 🇸🇰"},{id:8,name:"ICEHL 🇦🇹"},
+  {id:12,name:"NL 🇨🇭"},{id:19,name:"IIHF World Champ 🌍"},
+];
+const ESPORT_GAMES=[
+  {id:"csgo",label:"CS2",icon:"🔫"},{id:"lol",label:"LoL",icon:"⚔️"},
+  {id:"dota2",label:"Dota 2",icon:"🧙"},{id:"valorant",label:"Valorant",icon:"🎯"},
+  {id:"ow",label:"Overwatch 2",icon:"🦸"},{id:"r6siege",label:"Rainbow Six",icon:"🛡️"},
+  {id:"cod",label:"CoD",icon:"💣"},{id:"starcraft2",label:"SC2",icon:"🚀"},
+];
+const SPORTS_CFG={
+  football:{label:"⚽ Foci",apiBase:"https://v3.football.api-sports.io",endpoint:d=>`/fixtures?date=${d}&timezone=Europe/Budapest`,parse:r=>r.map(f=>({id:f.fixture.id,homeTeam:f.teams.home.name,awayTeam:f.teams.away.name,league:f.league.name,time:new Date(f.fixture.date).toLocaleTimeString("hu-HU",{hour:"2-digit",minute:"2-digit"})})),leagues:FOOTBALL_LEAGUES,oddsFields:[{k:"odds1",l:"1"},{k:"oddsX",l:"X"},{k:"odds2",l:"2"},{k:"oddsOver",l:"O2.5"},{k:"oddsUnder",l:"U2.5"},{k:"oddsBttsYes",l:"BTTS I"},{k:"oddsBttsNo",l:"BTTS N"}],hasBtts:true,aiPrompt:(m)=>`Focimeccs. Hazai:${m.homeTeam} Vendég:${m.awayTeam} Liga:${m.league}. Odds 1:${m.odds1||"?"} X:${m.oddsX||"?"} 2:${m.odds2||"?"} O2.5:${m.oddsOver||"?"} U2.5:${m.oddsUnder||"?"} BTTS I:${m.oddsBttsYes||"?"} BTTS N:${m.oddsBttsNo||"?"}. Elemezd: forma, xG, H2H, Poisson, sérülések, motiváció, taktika, piaci mozgás. Adj BTTS és Over/Under elemzést is.`},
+  basketball:{label:"🏀 Kosár",apiBase:"https://v1.basketball.api-sports.io",endpoint:d=>`/games?date=${d}&timezone=Europe/Budapest`,parse:r=>r.map(f=>({id:f.id,homeTeam:f.teams.home.name,awayTeam:f.teams.away.name,league:f.league.name,time:new Date(f.date).toLocaleTimeString("hu-HU",{hour:"2-digit",minute:"2-digit"})})),leagues:BASKETBALL_LEAGUES,oddsFields:[{k:"odds1",l:"Hazai"},{k:"odds2",l:"Vendég"},{k:"oddsOver",l:"O Total"},{k:"oddsUnder",l:"U Total"},{k:"oddsHc",l:"Spread"}],hasBtts:false,aiPrompt:(m)=>`Kosárlabda. Hazai:${m.homeTeam} Vendég:${m.awayTeam} Liga:${m.league}. Odds H:${m.odds1||"?"} V:${m.odds2||"?"} Over:${m.oddsOver||"?"} Under:${m.oddsUnder||"?"} Spread:${m.oddsHc||"?"}. Elemezd: forma, pont átlag, off/def rating, pace, back-to-back, sérülések, H2H.`},
+  hockey:{label:"🏒 Jégkorong",apiBase:"https://v1.hockey.api-sports.io",endpoint:d=>`/games?date=${d}&timezone=Europe/Budapest`,parse:r=>r.map(f=>({id:f.id,homeTeam:f.teams.home.name,awayTeam:f.teams.away.name,league:f.league.name,time:new Date(f.date).toLocaleTimeString("hu-HU",{hour:"2-digit",minute:"2-digit"})})),leagues:HOCKEY_LEAGUES,oddsFields:[{k:"odds1",l:"Hazai"},{k:"oddsX",l:"OT/SO"},{k:"odds2",l:"Vendég"},{k:"oddsOver",l:"O5.5"},{k:"oddsUnder",l:"U5.5"}],hasBtts:false,aiPrompt:(m)=>`Jégkorong. Hazai:${m.homeTeam} Vendég:${m.awayTeam} Liga:${m.league}. Odds H:${m.odds1||"?"} OT:${m.oddsX||"?"} V:${m.odds2||"?"} O5.5:${m.oddsOver||"?"} U5.5:${m.oddsUnder||"?"}. Elemezd: forma, gól átlag, power play%, save%, back-to-back, sérülések.`},
+  nfl:{label:"🏈 NFL",apiBase:"https://v1.american-football.api-sports.io",endpoint:d=>`/games?date=${d}&timezone=Europe/Budapest`,parse:r=>r.map(f=>({id:f.game?.id||f.id,homeTeam:f.teams.home.name,awayTeam:f.teams.away.name,league:f.league?.name||"NFL",time:f.game?.date?.time||"--:--"})),leagues:[{id:1,name:"NFL 🇺🇸"},{id:2,name:"NCAA 🇺🇸"}],oddsFields:[{k:"odds1",l:"Hazai ML"},{k:"odds2",l:"Vendég ML"},{k:"oddsHc",l:"Spread"},{k:"oddsOver",l:"O Total"},{k:"oddsUnder",l:"U Total"}],hasBtts:false,aiPrompt:(m)=>`NFL. Hazai:${m.homeTeam} Vendég:${m.awayTeam}. Odds H:${m.odds1||"?"} V:${m.odds2||"?"} Spread:${m.oddsHc||"?"} Over:${m.oddsOver||"?"} Under:${m.oddsUnder||"?"}. Elemezd: forma, passing/rushing yards, turnover diff, red zone%, QB sérülés, időjárás.`},
+  baseball:{label:"⚾ Baseball",apiBase:"https://v1.baseball.api-sports.io",endpoint:d=>`/games?date=${d}&timezone=Europe/Budapest`,parse:r=>r.map(f=>({id:f.id,homeTeam:f.teams.home.name,awayTeam:f.teams.away.name,league:f.league.name,time:new Date(f.date).toLocaleTimeString("hu-HU",{hour:"2-digit",minute:"2-digit"})})),leagues:[{id:1,name:"MLB 🇺🇸"},{id:2,name:"NPB 🇯🇵"},{id:3,name:"KBO 🇰🇷"}],oddsFields:[{k:"odds1",l:"Hazai ML"},{k:"odds2",l:"Vendég ML"},{k:"oddsOver",l:"O8.5"},{k:"oddsUnder",l:"U8.5"},{k:"oddsRl",l:"Run Line"}],hasBtts:false,aiPrompt:(m)=>`Baseball. Hazai:${m.homeTeam} Vendég:${m.awayTeam}. Odds H:${m.odds1||"?"} V:${m.odds2||"?"} Over:${m.oddsOver||"?"} Under:${m.oddsUnder||"?"} RL:${m.oddsRl||"?"}. Elemezd: starting pitcher ERA/WHIP, bullpen, batting avg, splits.`},
+  handball:{label:"🤾 Kézilabda",apiBase:"https://v1.handball.api-sports.io",endpoint:d=>`/games?date=${d}&timezone=Europe/Budapest`,parse:r=>r.map(f=>({id:f.id,homeTeam:f.teams.home.name,awayTeam:f.teams.away.name,league:f.league.name,time:new Date(f.date).toLocaleTimeString("hu-HU",{hour:"2-digit",minute:"2-digit"})})),leagues:[{id:11,name:"Champions League 🌍"},{id:23,name:"EHF Euro League 🌍"},{id:3,name:"Bundesliga 🇩🇪"},{id:5,name:"Starligue 🇫🇷"},{id:6,name:"Asobal 🇪🇸"},{id:267,name:"NB I 🇭🇺"}],oddsFields:[{k:"odds1",l:"Hazai"},{k:"oddsX",l:"Döntetlen"},{k:"odds2",l:"Vendég"},{k:"oddsOver",l:"O Total"},{k:"oddsUnder",l:"U Total"}],hasBtts:false,aiPrompt:(m)=>`Kézilabda. Hazai:${m.homeTeam} Vendég:${m.awayTeam} Liga:${m.league}. Odds H:${m.odds1||"?"} D:${m.oddsX||"?"} V:${m.odds2||"?"} Over:${m.oddsOver||"?"} Under:${m.oddsUnder||"?"}. Elemezd: forma, gól átlag, kapus hatékonyság, sérülések.`},
+  volleyball:{label:"🏐 Röplabda",apiBase:"https://v1.volleyball.api-sports.io",endpoint:d=>`/games?date=${d}&timezone=Europe/Budapest`,parse:r=>r.map(f=>({id:f.id,homeTeam:f.teams.home.name,awayTeam:f.teams.away.name,league:f.league.name,time:new Date(f.date).toLocaleTimeString("hu-HU",{hour:"2-digit",minute:"2-digit"})})),leagues:[{id:3,name:"Champions League 🌍"},{id:23,name:"CEV Cup 🌍"},{id:5,name:"Serie A1 🇮🇹"},{id:4,name:"Bundesliga 🇩🇪"},{id:6,name:"Superliga 🇷🇺"},{id:7,name:"PlusLiga 🇵🇱"}],oddsFields:[{k:"odds1",l:"Hazai"},{k:"odds2",l:"Vendég"},{k:"oddsOver",l:"O Sets"},{k:"oddsUnder",l:"U Sets"}],hasBtts:false,aiPrompt:(m)=>`Röplabda. Hazai:${m.homeTeam} Vendég:${m.awayTeam} Liga:${m.league}. Odds H:${m.odds1||"?"} V:${m.odds2||"?"} Over:${m.oddsOver||"?"} Under:${m.oddsUnder||"?"}. Elemezd: szett arány, forma, H2H.`},
+  esport:{label:"🎮 E-Sport",isEsport:true,oddsFields:[{k:"odds1",l:"Csapat 1"},{k:"odds2",l:"Csapat 2"},{k:"oddsHc",l:"Map Hc"}],hasBtts:false,aiPrompt:(m)=>`E-sport: ${m.game||"E-sport"}. ${m.homeTeam} vs ${m.awayTeam}. Torna:${m.league||""}. Odds 1:${m.odds1||"?"} 2:${m.odds2||"?"} Map Hc:${m.oddsHc||"?"}. Elemezd: forma, map win rate, H2H, roster változások, meta, tournament pressure.`},
+};
+const AI_SYSTEM=`Te egy profi sportfogadási és e-sport elemző vagy. Végezz sportágspecifikus elemzést. Válaszolj KIZÁRÓLAG valid JSON-ban: {"osszefoglalas":"magyar szöveg","bizonytalansagi_index":1-10,"eredmeny_piac":{"hazai_gyor":{"valoszinuseg":szám,"ertek":true/false},"dontetlen":{"valoszinuseg":szám,"ertek":true/false},"vendeg_gyor":{"valoszinuseg":szám,"ertek":true/false}},"btts_piac":{"igen":{"valoszinuseg":szám,"ertek":true/false},"nem":{"valoszinuseg":szám,"ertek":true/false}},"total_piac":{"over":{"valoszinuseg":szám,"ertek":true/false},"under":{"valoszinuseg":szám,"ertek":true/false}},"kombinalt_piacok":[{"nev":"string","valoszinuseg":szám,"ertek":true/false}],"legjobb_value_bet":"string","kelly_szazalek":szám,"kelly_felkel":szám,"legvaloszinubb_vegeredmeny":"string","fo_kockazatok":"string"}`;
+
+let apiKey=localStorage.getItem("sap_apikey")||"";
+let pandaKey=localStorage.getItem("sap_pandakey")||"";
+let activeSport="football";
+let activeEsportGame="csgo";
+let selectedLeagues={};
+let fixtures={};
+let selectedFixtures={};
+let oddsData={};
+let results={};
+let loadingIds={};
+let errors={};
+
+function today(){return new Date().toISOString().split("T")[0];}
+function implicitProb(o){return o?Math.round((1/parseFloat(o))*100):null;}
+
+function init(){
+  document.getElementById("headerDate").textContent=`AI · 8 sportág · ${today()}`;
+  if(apiKey){document.getElementById("apiKeyInput").value=apiKey;markSaved("apiKeySaveBtn","apiKeyInput");}
+  if(pandaKey){document.getElementById("pandaKeyInput").value=pandaKey;markSaved("pandaKeySaveBtn","pandaKeyInput");}
+  renderSportTabs();renderEsportTabs();switchSport("football");
+}
+function markSaved(b,i){
+  document.getElementById(b).textContent="✓ Mentve";
+  document.getElementById(b).className="btn-save saved";
+  document.getElementById(i).className="key-input saved";
+}
+function saveApiKey(){apiKey=document.getElementById("apiKeyInput").value.trim();if(!apiKey)return;localStorage.setItem("sap_apikey",apiKey);markSaved("apiKeySaveBtn","apiKeyInput");}
+function savePandaKey(){pandaKey=document.getElementById("pandaKeyInput").value.trim();if(!pandaKey)return;localStorage.setItem("sap_pandakey",pandaKey);markSaved("pandaKeySaveBtn","pandaKeyInput");}
+function toggleSettings(){const p=document.getElementById("settingsPanel");p.style.display=p.style.display==="none"?"block":"none";}
+function toggleLeagues(){const w=document.getElementById("leaguesWrap");const cfg=SPORTS_CFG[activeSport];const cur=selectedLeagues[activeSport]||cfg.leagues.map(l=>l.id);const vis=w.style.display!=="none";w.style.display=vis?"none":"flex";document.getElementById("leagueToggleBtn").textContent=`⚙️ Bajnokságok (${cur.length}/${cfg.leagues.length}) ${vis?"▼":"▲"}`;}
+
+function renderSportTabs(){document.getElementById("sportTabs").innerHTML=Object.entries(SPORTS_CFG).map(([k,s])=>`<button class="tab ${k===activeSport?(k==="esport"?"esport-active":"active"):""}" onclick="switchSport('${k}')">${s.label}</button>`).join("");}
+function renderEsportTabs(){document.getElementById("esportTabs").innerHTML=ESPORT_GAMES.map(g=>`<button class="etab ${g.id===activeEsportGame?"active":""}" onclick="switchEsportGame('${g.id}')">${g.icon} ${g.label}</button>`).join("");}
+
+function switchSport(sport){activeSport=sport;renderSportTabs();document.getElementById("esportTabs").style.display=SPORTS_CFG[sport].isEsport?"flex":"none";renderLeagueFilter();renderFixtures();updateStats();updateAnalyzeBtn();showError("");}
+function switchEsportGame(g){activeEsportGame=g;renderEsportTabs();renderFixtures();updateStats();updateAnalyzeBtn();}
+
+function renderLeagueFilter(){
+  const cfg=SPORTS_CFG[activeSport];const lf=document.getElementById("leagueFilter");
+  if(cfg.isEsport||!cfg.leagues){lf.style.display="none";return;}
+  lf.style.display="block";
+  const cur=selectedLeagues[activeSport]||cfg.leagues.map(l=>l.id);
+  selectedLeagues[activeSport]=cur;
+  document.getElementById("leagueToggleBtn").textContent=`⚙️ Bajnokságok (${cur.length}/${cfg.leagues.length}) ▼`;
+  document.getElementById("leaguesWrap").style.display="none";
+  document.getElementById("leaguesWrap").innerHTML=cfg.leagues.map(l=>`<button class="league-btn ${cur.includes(l.id)?"active":""}" onclick="toggleLeague(${l.id})">${l.name}</button>`).join("");
+}
+function toggleLeague(id){
+  const cfg=SPORTS_CFG[activeSport];let cur=selectedLeagues[activeSport]||cfg.leagues.map(l=>l.id);
+  cur=cur.includes(id)?cur.filter(x=>x!==id):[...cur,id];
+  selectedLeagues[activeSport]=cur;renderLeagueFilter();
+  document.getElementById("leaguesWrap").style.display="flex";
+}
+
+function fixtureKey(){return SPORTS_CFG[activeSport].isEsport?`esport_${activeEsportGame}`:activeSport;}
+function currentFixtures(){return fixtures[fixtureKey()]||[];}
+
+async function loadFixtures(){
+  const isEs=SPORTS_CFG[activeSport].isEsport;
+  if(!isEs&&!apiKey){showError("⚠️ Add meg az API-Sports kulcsot a ⚙️ beállításokban!");return;}
+  if(isEs&&!pandaKey){showError("⚠️ Add meg a PandaScore tokent a ⚙️ beállításokban!");return;}
+  const btn=document.getElementById("loadBtn");btn.disabled=true;btn.innerHTML='<div class="spinner"></div> Letöltés...';showError("");
+  try{
+    let all=[];
+    if(isEs){
+      const d=today();const tom=new Date(Date.now()+86400000).toISOString().split("T")[0];
+      const url=`https://api.pandascore.co/${activeEsportGame}/matches/upcoming?filter[begin_at]=${d},${tom}&per_page=50&sort=begin_at`;
+      const res=await fetch(url,{headers:{Authorization:`Bearer ${pandaKey}`}});
+      const data=await res.json();if(!Array.isArray(data))throw new Error(data.error||"PandaScore hiba");
+      const gl=ESPORT_GAMES.find(g=>g.id===activeEsportGame);
+      all=data.map(m=>({id:m.id,homeTeam:m.opponents?.[0]?.opponent?.name||"TBD",awayTeam:m.opponents?.[1]?.opponent?.name||"TBD",league:m.league?.name||m.tournament?.name||"",time:m.begin_at?new Date(m.begin_at).toLocaleTimeString("hu-HU",{hour:"2-digit",minute:"2-digit"}):"--:--",game:gl?.label,gameIcon:gl?.icon,numberOfGames:m.number_of_games}));
+    }else{
+      const cfg=SPORTS_CFG[activeSport];
+      const res=await fetch(cfg.apiBase+cfg.endpoint(today()),{headers:{"x-apisports-key":apiKey}});
+      const data=await res.json();if(data.errors&&Object.keys(data.errors).length>0)throw new Error(JSON.stringify(data.errors));
+      all=cfg.parse(data.response||[]);
+    }
+    fixtures[fixtureKey()]=all;selectedFixtures={};
+    if(all.length===0)showError("Nincsenek mai meccsek.");
+    renderFixtures();updateStats();updateAnalyzeBtn();
+  }catch(e){showError("API hiba: "+e.message);}
+  btn.disabled=false;btn.innerHTML="📅 Mai meccsek letöltése";
+}
+
+function renderFixtures(){
+  const fxs=currentFixtures();const c=document.getElementById("fixturesContainer");
+  const sr=document.getElementById("selRow");const ab=document.getElementById("analyzeBtn");
+  if(!fxs.length){c.innerHTML="";sr.style.display="none";ab.style.display="none";return;}
+  sr.style.display="flex";ab.style.display="block";
+  document.getElementById("selHint").textContent=`${fxs.length} meccs találat`;
+  document.getElementById("statsRow").style.display="flex";
+  c.innerHTML=fxs.map(f=>renderFixtureHTML(f)).join("");
+}
+
+function renderFixtureHTML(f){
+  const cfg=SPORTS_CFG[activeSport];const sel=!!selectedFixtures[f.id];const o=oddsData[f.id]||{};
+  const oi=cfg.oddsFields.map(field=>`<div class="odds-field"><label>${field.l}</label><input type="number" step="0.01" value="${o[field.k]||""}" placeholder="1.85" onchange="setOdds(${f.id},'${field.k}',this.value)"/></div>`).join("");
+  const gt=f.game?`<span style="color:#ffd166;margin-right:5px">${f.gameIcon||"🎮"} ${f.game}</span>`:"";
+  const bo=f.numberOfGames?` · <span style="color:#8b949e">BO${f.numberOfGames}</span>`:"";
+  const isLoading=!!loadingIds[f.id];const hasError=!!errors[f.id];const hasResult=!!results[f.id];
+  return `<div class="fixture ${sel?"selected":""}" id="fix_${f.id}">
+    <div class="fixture-row">
+      <input type="checkbox" class="fixture-check" ${sel?"checked":""} onchange="toggleFixture(${f.id})"/>
+      <div class="fixture-info">
+        <div class="fixture-name">${f.homeTeam} <span style="color:#8b949e">vs</span> ${f.awayTeam}${bo}</div>
+        <div class="fixture-meta">${gt}${f.league||""} · ${f.time||""}</div>
+      </div>
+      <button class="btn-odds" onclick="toggleOdds(${f.id})">Odds ▾</button>
+    </div>
+    <div class="odds-grid" id="odds_${f.id}" style="display:none;grid-template-columns:repeat(${cfg.oddsFields.length},1fr)">${oi}</div>
+    ${isLoading?`<div class="loading-row"><div class="spinner"></div><span style="color:#8b949e;font-size:11px">AI elemzés...</span></div>`:""}
+    ${hasError?`<div class="error-row">⚠️ ${errors[f.id]}</div>`:""}
+    ${hasResult?renderResultHTML(f):""}
+  </div>`;
+}
+
+function toggleFixture(id){selectedFixtures[id]=!selectedFixtures[id];const el=document.getElementById(`fix_${id}`);if(el)el.className=`fixture ${selectedFixtures[id]?"selected":""}`;updateStats();updateAnalyzeBtn();}
+function toggleOdds(id){const el=document.getElementById(`odds_${id}`);if(el)el.style.display=el.style.display==="none"?"grid":"none";}
+function setOdds(id,field,val){if(!oddsData[id])oddsData[id]={};oddsData[id][field]=val;}
+function selectAll(){currentFixtures().forEach(f=>{selectedFixtures[f.id]=true;});renderFixtures();updateStats();updateAnalyzeBtn();}
+function selectNone(){currentFixtures().forEach(f=>{selectedFixtures[f.id]=false;});renderFixtures();updateStats();updateAnalyzeBtn();}
+
+function updateStats(){
+  const fxs=currentFixtures();const sel=fxs.filter(f=>selectedFixtures[f.id]).length;
+  const val=Object.values(results).filter(r=>[r.eredmeny_piac?.hazai_gyor,r.eredmeny_piac?.vendeg_gyor,r.btts_piac?.igen,r.total_piac?.over].some(d=>d?.ertek)).length;
+  document.getElementById("statTotal").textContent=fxs.length;
+  document.getElementById("statSelected").textContent=sel;
+  document.getElementById("statValue").textContent=val;
+  if(fxs.length>0)document.getElementById("statsRow").style.display="flex";
+}
+function updateAnalyzeBtn(){
+  const sel=currentFixtures().filter(f=>selectedFixtures[f.id]).length;
+  const btn=document.getElementById("analyzeBtn");
+  btn.disabled=sel===0;btn.textContent=sel>0?`🔍 ${sel} MECCS ELEMZÉSE`:"🔍 MECCSEK ELEMZÉSE";
+}
+function showError(msg){const el=document.getElementById("fetchError");el.textContent=msg;el.style.display=msg?"block":"none";}
+
+async function analyzeSelected(){
+  const fxs=currentFixtures().filter(f=>selectedFixtures[f.id]);if(!fxs.length)return;
+  const btn=document.getElementById("analyzeBtn");btn.disabled=true;
+  fxs.forEach(f=>{loadingIds[f.id]=true;});renderFixtures();
+  let done=0;
+  await Promise.all(fxs.map(async f=>{
+    try{
+      const match={...f,...(oddsData[f.id]||{})};
+      const cfg=SPORTS_CFG[activeSport];
+      // Call via Netlify Function proxy
+      const res=await fetch("/.netlify/functions/ai",{
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({system:AI_SYSTEM,messages:[{role:"user",content:cfg.aiPrompt(match)}]})
+      });
+      const data=await res.json();
+      const text=data.content.filter(b=>b.type==="text").map(b=>b.text).join("\n");
+      const m=text.match(/\{[\s\S]*\}/);if(!m)throw new Error("JSON nem érkezett");
+      results[f.id]=JSON.parse(m[0]);
+    }catch(e){errors[f.id]=e.message;}
+    finally{delete loadingIds[f.id];done++;btn.textContent=`⏳ ELEMZÉS... (${done}/${fxs.length})`;}
+  }));
+  renderFixtures();updateStats();btn.disabled=false;btn.textContent=`🔍 ${fxs.length} MECCS ELEMZÉSE`;
+}
+
+function renderResultHTML(f){
+  const r=results[f.id];if(!r)return"";
+  const cfg=SPORTS_CFG[activeSport];const kelly=Math.round((r.kelly_felkel/100)*10000);
+  const cc=r.bizonytalansagi_index<=4?"#ff4d6d":r.bizonytalansagi_index<=6?"#ffd166":"#00ff9d";
+  const pr=(label,prob,ertek,odds)=>{const ip=implicitProb(odds);return`<div class="prob-row"><span class="prob-label">${label}</span><div class="prob-right">${ip?`<span class="prob-implicit">${ip}%</span>`:""}<span class="prob-val">${prob||"?"}%</span><span class="tag ${ertek?"tag-yes":"tag-no"}">${ertek?"✅":"❌"}</span></div></div>`;};
+  const o=oddsData[f.id]||{};
+  const btts=cfg.hasBtts&&r.btts_piac?`${pr("Mindkettő gólt szerez",r.btts_piac.igen?.valoszinuseg,r.btts_piac.igen?.ertek,o.oddsBttsYes)}${pr("Valamelyik nullán marad",r.btts_piac.nem?.valoszinuseg,r.btts_piac.nem?.ertek,o.oddsBttsNo)}<div class="divider"></div>`:"";
+  const total=r.total_piac?`<div class="market-title">📊 Total</div>${pr("Over",r.total_piac.over?.valoszinuseg,r.total_piac.over?.ertek,o.oddsOver)}${pr("Under",r.total_piac.under?.valoszinuseg,r.total_piac.under?.ertek,o.oddsUnder)}`:"";
+  const komb=r.kombinalt_piacok?.length?`<div class="kombinalt-box"><div class="market-title">🔗 Kombinált</div><div class="kombinalt-grid">${r.kombinalt_piacok.map(k=>pr(k.nev,k.valoszinuseg,k.ertek,null)).join("")}</div></div>`:"";
+  const hn=f.homeTeam?.split(" ").slice(-1)[0];const an=f.awayTeam?.split(" ").slice(-1)[0];
+  return`<div class="result-card"><div class="result-header" onclick="toggleResult('res_${f.id}')"><span style="color:#e6edf3;font-size:12px;font-weight:600">${r.legvaloszinubb_vegeredmeny} · <span style="color:#00ff9d">${(r.legjobb_value_bet||"").slice(0,40)}</span></span><span style="color:#8b949e" id="ra_${f.id}">▼</span></div><div id="res_${f.id}" style="display:none"><div class="result-body"><p class="summary">${r.osszefoglalas||""}</p><div class="conf-wrap"><div class="conf-label">Megbízhatóság</div><div class="conf-bar-wrap"><div class="conf-bar-bg"><div class="conf-bar-fill" style="width:${(r.bizonytalansagi_index||5)*10}%;background:${cc}"></div></div><span style="color:${cc};font-weight:700;font-size:11px">${r.bizonytalansagi_index}/10</span></div></div><div class="markets-grid"><div class="market-box"><div class="market-title">🏆 Eredmény</div>${pr(hn,r.eredmeny_piac?.hazai_gyor?.valoszinuseg,r.eredmeny_piac?.hazai_gyor?.ertek,o.odds1)}${r.eredmeny_piac?.dontetlen?pr("Döntetlen",r.eredmeny_piac.dontetlen.valoszinuseg,r.eredmeny_piac.dontetlen.ertek,o.oddsX):""} ${pr(an,r.eredmeny_piac?.vendeg_gyor?.valoszinuseg,r.eredmeny_piac?.vendeg_gyor?.ertek,o.odds2)}</div><div class="market-box">${btts}${total}</div></div>${komb}<div class="bottom-grid"><div class="kelly-box"><div class="market-title">🧮 Kelly · 10 000 Ft</div><div class="kelly-row">Kelly: <span style="color:#ffd166;font-weight:700">${r.kelly_szazalek}%</span></div><div class="kelly-row">Fél-Kelly: <span style="color:#00ff9d;font-weight:700">${r.kelly_felkel}%</span></div><div class="kelly-row">Tét: <span style="color:#388bfd;font-weight:700">${kelly.toLocaleString("hu-HU")} Ft</span></div></div><div class="risk-box"><div class="risk-title">⚠️ Kockázatok</div><p class="risk-text">${r.fo_kockazatok||""}</p></div></div></div></div></div>`;
+}
+function toggleResult(id){const el=document.getElementById(id);const ar=document.getElementById("ra_"+id.replace("res_",""));if(!el)return;const op=el.style.display!=="none";el.style.display=op?"none":"block";if(ar)ar.textContent=op?"▼":"▲";}
+
+init();
+</script>
+</body>
+</html>
